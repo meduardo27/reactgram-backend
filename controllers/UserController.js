@@ -43,7 +43,6 @@ const register = async (req, res) => {
   }
 
   res.status(201).json({
-    
     _id: newUser._id,
     token: generateToken(newUser._id),
   });
@@ -99,6 +98,8 @@ const update = async (req, res) => {
   if (name) {
     user.name = name;
   }
+  console.log(name)
+  console.log(user)
 
   if (password) {
     const salt = await bcrypt.genSalt();
@@ -122,7 +123,7 @@ const update = async (req, res) => {
 // Get user by id
 const getUserById = async (req, res) => {
   const { id } = req.params;
-
+  console.log(id);
   const user = await User.findById(mongoose.Types.ObjectId(id)).select(
     "-password"
   );
@@ -132,7 +133,7 @@ const getUserById = async (req, res) => {
     res.status(404).json({ errors: ["Usuário não encontrado."] });
     return;
   }
-  
+
   res.status(200).json(user);
 };
 
