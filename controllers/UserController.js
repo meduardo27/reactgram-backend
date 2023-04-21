@@ -2,8 +2,7 @@ const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
-const mongoose = require("mongoose");
+const { default: mongoose } = require("mongoose");
 
 const jwtSecret = process.env.JWT_SECRET;
 
@@ -44,9 +43,17 @@ const register = async (req, res) => {
   }
 
   res.status(201).json({
-    id: newUser._id,
+    
+    _id: newUser._id,
     token: generateToken(newUser._id),
   });
+};
+
+// Get current logged in user
+const getCurrentUser = async (req, res) => {
+  const user = req.user;
+
+  res.status(200).json(user);
 };
 
 // Sign user in
@@ -67,17 +74,11 @@ const login = async (req, res) => {
   }
 
   // Return user with token
-  res.status(201).json({
-    id: user._id,
+  res.status(200).json({
+    _id: user._id,
     profileimage: user.profileImage,
     token: generateToken(user._id),
   });
-};
-
-// Get current logged in user
-const getCurrentUser = async (req, res) => {
-  const user = req.user;
-  res.status(200).json(user);
 };
 
 const update = async (req, res) => {
@@ -90,7 +91,10 @@ const update = async (req, res) => {
   }
 
   const reqUser = req.user;
-  const user = await User.findById(reqUser._id).select("-password");
+
+  const user = await User.findById(mongoose.Types.ObjectId(reqUser._id)).select(
+    "-password"
+  );
 
   if (name) {
     user.name = name;
@@ -119,24 +123,23 @@ const update = async (req, res) => {
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
-  try {
-    const user = await User.findById(mongoose.Types.ObjectId(id)).select(
-      "-password"
-    );
-    // Check if user exists
-    if (!user) {
-      res.status(404).json({ errors: ["Usuário não encontrado."] });
-    }
-    res.status(200).json(user);
-  } catch (error) {
-    res.status(404).json({ errors: ["Usuário não encontrado"] });
+  const user = await User.findById(mongoose.Types.ObjectId(id)).select(
+    "-password"
+  );
+
+  // Check if user exists
+  if (!user) {
+    res.status(404).json({ errors: ["Usuário não encontrado."] });
+    return;
   }
+  
+  res.status(200).json(user);
 };
 
 module.exports = {
   register,
-  login,
   getCurrentUser,
+  login,
   update,
   getUserById,
 };

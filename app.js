@@ -21,6 +21,10 @@ app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
 // DB connection
 require("./config/db.js");
 
+app.get("/", (req, res) => {
+  res.send("API Working!");
+});
+
 // routes
 const router = require("./routers/Router.js");
 
